@@ -5,15 +5,14 @@ import React, {
   useMemo,
   useRef,
 } from 'react'
-import type { ReactNode } from 'react'
 import classNames from 'classnames'
 import { Popover, PopoverProps, PopoverRef } from './popover'
 
 const classPrefix = `adm-popover-menu`
 
 export type Action = {
-  text: ReactNode
-  icon?: ReactNode
+  text: React.ReactNode
+  icon?: React.ReactNode
   disabled?: boolean
   key?: string | number
   onClick?: () => void
@@ -22,6 +21,7 @@ export type Action = {
 export type PopoverMenuProps = Omit<PopoverProps, 'content'> & {
   actions: Action[]
   onAction?: (item: Action) => void
+  maxCount?: number
 }
 
 export const PopoverMenu = forwardRef<PopoverRef, PopoverMenuProps>(
@@ -41,9 +41,17 @@ export const PopoverMenu = forwardRef<PopoverRef, PopoverMenuProps>(
       [props.onAction]
     )
 
-    const overlay = useMemo(() => {
-      return (
-        <div className={`${classPrefix}-list`}>
+    const overlay = useMemo(
+      () => (
+        <div
+          className={classNames(`${classPrefix}-list`, {
+            [`${classPrefix}-list-scroll`]:
+              props?.maxCount && props.actions.length > props?.maxCount,
+          })}
+          style={{
+            height: props?.maxCount && props?.maxCount * 48,
+          }}
+        >
           <div className={`${classPrefix}-list-inner`}>
             {props.actions.map((action, index) => (
               <a
@@ -69,8 +77,9 @@ export const PopoverMenu = forwardRef<PopoverRef, PopoverMenuProps>(
             ))}
           </div>
         </div>
-      )
-    }, [props.actions, onClick])
+      ),
+      [props.actions, onClick]
+    )
 
     return (
       <Popover
